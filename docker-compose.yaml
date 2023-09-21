@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  web:
+    container_name: nginx
+    image: nginx:alpine
+    depends_on:
+      - app
+    ports:
+      - 8082:80
+    volumes:
+      - ./app/conf.d:/etc/nginx/conf.d
+    networks:
+      - custom
+    restart: always
+
+  app:
+    container_name: history_blog
+    command: bash -c 'uvicorn app.main:app --host 0.0.0.0 --port 8000'
+    build: ./
+    depends_on:
+      - mongo_db
+    volumes:
+      - ./app:/src/app
+    ports:
+      - 8000:8000
+    expose:
+      - 9000
+    environment:
+      - TZ=Asia/Yekaterinburg
+    networks:
+      - custom
+    restart: always
+
+  mongo_db:
+    container_name: mongo_db
+    image: mongo
+    ports:
+      - 27018:27017
+    volumes:
+      - dbdata6:/data/db
+    networks:
+      - custom
+    restart: always
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.47.0
+    volumes:
+      - ./metrics/prometheus/:/etc/prometheus/
+    expose:
+      - 9090
+    networks:
+      - custom
+    restart: always
+
+  node_exporter:
+    container_name: node_exporter
+    image: prom/node-exporter:v1.5.0
+    expose:
+      - 9100:9100
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - custom
+    restart: always
+
+  grafana:
+    container_name: grafana
+    user: "0:0"
+    image: grafana/grafana-oss:9.4.7
+    ports:
+      - 9050:3000
+    volumes:
+      - ./.grafana_data:/var/lib/grafana
+      - ./metrics/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./metrics/grafana/provisioning:/etc/grafana/provisioning/dashboards
+    networks:
+      - custom
+    restart: always
+
+volumes:
+  dbdata6:
+networks:
+  custom:
+    driver: bridge
