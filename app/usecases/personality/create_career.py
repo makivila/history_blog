@@ -1,6 +1,7 @@
 from ...models import Career
 from ...dto.usecase_result import UsecaseResult, UsecaseStatus
 from ...repository.personality import PersonalityRepository
+import traceback
 
 
 class CreateCareerUsecase:
@@ -9,8 +10,8 @@ class CreateCareerUsecase:
 
     async def execute(self, career: Career) -> UsecaseResult:
         try:
-            career_exist = await self.repository.get_career_by_name(career.name)
-            if career_exist:
+            career_exists = await self.repository.get_career_by_name(career.name)
+            if career_exists:
                 return UsecaseResult(
                     UsecaseStatus.BAD_REQUEST, "This career already exsist"
                 )
@@ -19,4 +20,5 @@ class CreateCareerUsecase:
             if result:
                 return UsecaseResult()
         except Exception as e:
+            print(traceback.format_exc())
             return UsecaseResult(UsecaseStatus.INTERNAL_ERROR, e)

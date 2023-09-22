@@ -95,8 +95,11 @@ class Event(BaseModel):
 
 
 class EventsAndPersonality(BaseModel):
-    personality_id: int
-    event_id: int
+    personality_id: str
+    event_id: str
+
+    def to_json(self):
+        return {"personality_id": self.personality_id, "event_id": self.event_id}
 
 
 class Career(BaseModel):
