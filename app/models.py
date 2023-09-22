@@ -111,3 +111,6 @@ class Career(BaseModel):
                 "name": "Императрица",
             }
         }
+
+    def to_json(self):
+        return {"_id": str(self.id), "name": self.name}

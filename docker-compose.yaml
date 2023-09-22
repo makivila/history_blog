@@ -13,6 +13,8 @@ services:
     networks:
       - custom
     restart: always
+    env_file:
+      - .env
 
   app:
     container_name: history_blog
@@ -31,6 +33,8 @@ services:
     networks:
       - custom
     restart: always
+    env_file:
+      - .env
 
   mongo_db:
     container_name: mongo_db
@@ -42,6 +46,8 @@ services:
     networks:
       - custom
     restart: always
+    env_file:
+      - .env
 
   prometheus:
     container_name: prometheus
@@ -53,6 +59,8 @@ services:
     networks:
       - custom
     restart: always
+    env_file:
+      - .env
 
   node_exporter:
     container_name: node_exporter
@@ -71,6 +79,8 @@ services:
     networks:
       - custom
     restart: always
+    env_file:
+      - .env
 
   grafana:
     container_name: grafana
@@ -85,6 +95,8 @@ services:
     networks:
       - custom
     restart: always
+    env_file:
+      - .env
 
 volumes:
   dbdata6:
