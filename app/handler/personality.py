@@ -4,6 +4,7 @@ from ..dependencies import (
     create_personalit_usecase,
     create_career_usecase,
     set_event_usecase,
+    get_personality_by_id_usecase,
 )
 from fastapi import APIRouter, status
 from .helper.responses import failure_response, success_response
@@ -54,3 +55,15 @@ async def set_event_by_personality(events_and_personality: EventsAndPersonality)
     if result.status != UsecaseStatus.SUCCESS:
         return handle_failure_result(result)
     return success_response("Event set successfully")
+
+
+@personality_router.get(
+    "/personality/{personality_id}/",
+    response_description="Get personality by id",
+    response_model=EventsAndPersonality,
+)
+async def get_personality_by_id(personality_id: str):
+    result = await get_personality_by_id_usecase.execute(personality_id)
+    if result.status != UsecaseStatus.SUCCESS:
+        return handle_failure_result(result)
+    return success_response(result.data)

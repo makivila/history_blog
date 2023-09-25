@@ -1,6 +1,10 @@
 import datetime
 from ..models import Event, EventsAndPersonality
-from ..dependencies import create_usecase, set_personality_usecase
+from ..dependencies import (
+    create_usecase,
+    set_personality_usecase,
+    get_event_by_id_usecase,
+)
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from .helper.responses import failure_response, success_response
@@ -45,7 +49,7 @@ async def set_personality_by_event(events_and_personality: EventsAndPersonality)
     response_model=EventsAndPersonality,
 )
 async def get_event_by_id(event_id: str):
-    result = await se_personality_usecase.execute(event_id)
+    result = await get_event_by_id_usecase.execute(event_id)
     if result.status != UsecaseStatus.SUCCESS:
         return handle_failure_result(result)
-    return success_response()
+    return success_response(result.data)
