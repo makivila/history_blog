@@ -5,6 +5,8 @@ from ..dependencies import (
     create_career_usecase,
     set_event_usecase,
     get_personality_by_id_usecase,
+    get_all_personalities_usecase,
+    get_all_careers_usecase,
 )
 from fastapi import APIRouter, status
 from .helper.responses import failure_response, success_response
@@ -58,12 +60,46 @@ async def set_event_by_personality(events_and_personality: EventsAndPersonality)
 
 
 @personality_router.get(
-    "/personality/{personality_id}/",
-    response_description="Get personality by id",
-    response_model=EventsAndPersonality,
+    "/personality/{personality_id}/", response_description="Get personality by id"
 )
 async def get_personality_by_id(personality_id: str):
     result = await get_personality_by_id_usecase.execute(personality_id)
+    if result.status != UsecaseStatus.SUCCESS:
+        return handle_failure_result(result)
+    return success_response(result.data)
+
+
+@personality_router.get("/personality", response_description="Get all personalities")
+async def get_all_personalities(offset: int, limit: int):
+    result = await get_all_personalities_usecase.execute(offset, limit)
+    if result.status != UsecaseStatus.SUCCESS:
+        return handle_failure_result(result)
+    return success_response(result.data)
+
+
+@personality_router.delete(
+    "/personality/{personality_id}", response_description="Delete personality by id"
+)
+async def delete_personality_by_id(personality_id: str):
+    result = await get_all_carers_usecase.execute(personality_id)
+    if result.status != UsecaseStatus.SUCCESS:
+        return handle_failure_result(result)
+    return success_response(result.data)
+
+
+@personality_router.get("/personality/career", response_description="Get all careers")
+async def get_all_careers(offset: int, limit: int):
+    result = await get_all_careers_usecase.execute(offset, limit)
+    if result.status != UsecaseStatus.SUCCESS:
+        return handle_failure_result(result)
+    return success_response(result.data)
+
+
+@personality_router.delete(
+    "/personality/career/{career_id}", response_description="Delete career by id"
+)
+async def delete_career_by_id(career_id: str):
+    result = await get_all_carers_usecase.execute(career_id)
     if result.status != UsecaseStatus.SUCCESS:
         return handle_failure_result(result)
     return success_response(result.data)

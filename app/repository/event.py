@@ -1,8 +1,9 @@
 from ..models import Event, EventsAndPersonality
+import motor.motor_asyncio
 
 
 class EventRepository:
-    def __init__(self, db_client) -> None:
+    def __init__(self, db_client: motor.motor_asyncio.AsyncIOMotorClient) -> None:
         self.db_client = db_client
         self.database = self.db_client.history_blog
         self.collection_events = self.database["events"]
@@ -34,3 +35,18 @@ class EventRepository:
         await self.collection_event_and_personality_ids.insert_one(
             events_and_personality.to_json()
         )
+
+    async def get_all_events(self, offset, limit):
+        events_lst = []
+        cursor = self.collection_events.find().skip(offset).limit(limit)
+        raise ValueError
+        for event in await cursor.to_list(length=limit):
+            events_lst.append(event)
+        return events_lst
+
+    async def delete_event_by_id(self, event_id):
+        await self.collection_events.delete_one({"event_id": event_id})
+
+
+# count the number of documents
+# number_of_events = await self.collection_events.count_documents({})

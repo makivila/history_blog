@@ -23,7 +23,6 @@ class PersonalityRepository:
 
     async def get_personality_by_name(self, name: str):
         result = await self.collection_personality.find_one({"name": name})
-        print("посмотри на резалт в репозитории", result)
         return result
 
     async def create_career(self, career: Career):
@@ -50,3 +49,19 @@ class PersonalityRepository:
         await self.collection_event_and_personality_ids.insert_one(
             events_and_personality.to_json()
         )
+
+    async def get_all_personalities(self, offset, limit):
+        personalities_lst = []
+        cursor = self.collection_personality.find().skip(offset).limit(limit)
+
+        for personality in await cursor.to_list(length=limit):
+            personalities_lst.append(personality)
+        return personalities_lst
+
+    async def get_all_careers(self, offset, limit):
+        careers_lst = []
+        cursor = self.collection_career.find().skip(offset).limit(limit)
+
+        for career in await cursor.to_list(length=limit):
+            careers_lst.append(career)
+        return careers_lst

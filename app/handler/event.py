@@ -4,8 +4,10 @@ from ..dependencies import (
     create_usecase,
     set_personality_usecase,
     get_event_by_id_usecase,
+    get_all_events_usecase,
+    delete_event_by_id_usecase,
 )
-from fastapi import APIRouter, status
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from .helper.responses import failure_response, success_response
 from .helper.handle_failure_result import handle_failure_result
@@ -43,13 +45,28 @@ async def set_personality_by_event(events_and_personality: EventsAndPersonality)
     return success_response("Personality set successfully")
 
 
-@event_router.get(
-    "/event/{event_id}/",
-    response_description="Get event by id",
-    response_model=EventsAndPersonality,
-)
+@event_router.get("/event/{event_id}/", response_description="Get event by id")
 async def get_event_by_id(event_id: str):
     result = await get_event_by_id_usecase.execute(event_id)
+    if result.status != UsecaseStatus.SUCCESS:
+        return handle_failure_result(result)
+    return success_response(result.data)
+
+
+@event_router.get("/event", response_description="Get all events")
+async def get_all_events(
+    offset: int,
+    limit: int,
+):
+    result = await get_all_events_usecase.execute(offset, limit)
+    if result.status != UsecaseStatus.SUCCESS:
+        return handle_failure_result(result)
+    return success_response(result.data)
+
+
+@event_router.delete("/event/{event_id}", response_description="Delete event by id")
+async def delete_event_by_id(event_id: str):
+    result = await delete_event_by_id_usecase.execute(event_id)
     if result.status != UsecaseStatus.SUCCESS:
         return handle_failure_result(result)
     return success_response(result.data)
