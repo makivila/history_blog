@@ -16,8 +16,13 @@ class ApplicationException(Exception):
         return {"message": self.message}
 
 
-class NotPupsik(ApplicationException):
+class NotFoundException(ApplicationException):
+    def __init__(self, message="Not found", status_type=StatusType.NOT_FOUND) -> None:
+        super().__init__(message, status_type)
+
+
+class BadRequestException(ApplicationException):
     def __init__(
-        self, message="Pupsik not found", status_type=StatusType.NOT_FOUND
+        self, message="Bad request", status_type=StatusType.BAD_REQUEST
     ) -> None:
         super().__init__(message, status_type)

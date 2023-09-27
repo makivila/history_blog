@@ -1,11 +1,10 @@
 import uvicorn
-
-from app.handler.exceptions import ApplicationException, NotPupsik
+from app.handler.helper.exceptions import ApplicationException
 from .handler.event import event_router
 from .handler.personality import personality_router
 from fastapi import FastAPI
-from fastapi import APIRouter
-from .handler.exception_handlers import (
+
+from .handler.helper.exception_handlers import (
     application_exception_handler,
     unexpected_exception_handler,
 )

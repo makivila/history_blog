@@ -1,4 +1,4 @@
-from ..models import Personality, Career, EventsAndPersonality
+from app.models import Personality, Career, EventsAndPersonality
 
 
 class PersonalityRepository:
@@ -18,7 +18,19 @@ class PersonalityRepository:
         return new_personality
 
     async def get_personality_by_id(self, id: str):
-        personality = await self.collection_personality.find_one({"_id": id})
+        personality_dict = await self.collection_personality.find_one({"_id": id})
+        if not personality_dict:
+            return None
+        personality = Personality(
+            id=personality_dict["_id"],
+            name=personality_dict["name"],
+            career_id=personality_dict["career_id"],
+            description=personality_dict["description"],
+            interesting_facts=personality_dict["interesting_facts"],
+            born=personality_dict["born"],
+            died=personality_dict["died"],
+            create_dt=personality_dict["create_dt"],
+        )
         return personality
 
     async def get_personality_by_name(self, name: str):
@@ -30,7 +42,10 @@ class PersonalityRepository:
         return new_career
 
     async def get_career_by_id(self, id: str):
-        career = await self.collection_career.find_one({"_id": id})
+        career_dict = await self.collection_career.find_one({"_id": id})
+        if not career_dict:
+            return None
+        career = Career(name=career_dict["name"])
         return career
 
     async def get_career_by_name(self, name: str):
@@ -54,7 +69,17 @@ class PersonalityRepository:
         personalities_lst = []
         cursor = self.collection_personality.find().skip(offset).limit(limit)
 
-        for personality in await cursor.to_list(length=limit):
+        for personality_dict in await cursor.to_list(length=limit):
+            personality = Personality(
+                d=personality_dict["_id"],
+                name=personality_dict["name"],
+                career_id=personality_dict["career_id"],
+                description=personality_dict["description"],
+                interesting_facts=personality_dict["interesting_facts"],
+                born=personality_dict["born"],
+                died=personality_dict["died"],
+                create_dt=personality_dict["create_dt"],
+            )
             personalities_lst.append(personality)
         return personalities_lst
 
@@ -62,6 +87,21 @@ class PersonalityRepository:
         careers_lst = []
         cursor = self.collection_career.find().skip(offset).limit(limit)
 
-        for career in await cursor.to_list(length=limit):
+        for career_dict in await cursor.to_list(length=limit):
+            career = Career(id=career_dict["_id"], name=career_dict["name"])
             careers_lst.append(career)
         return careers_lst
+
+    async def delete_personality_by_id(self, id) -> None:
+        await self.collection_personality.delete_one({"_id": id})
+
+    async def delete_career_by_id(self, id) -> None:
+        await self.collection_career.delete_one({"_id": id})
+
+    async def update_personality(self, personality: Personality) -> None:
+        await self.collection_personality.replace_one(
+            {"_id": personality.id}, personality.to_json()
+        )
+
+    async def update_career(self, career: Career) -> None:
+        await self.collection_career.replace_one({"_id": career.id}, career.to_json())

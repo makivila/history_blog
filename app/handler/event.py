@@ -1,17 +1,15 @@
-import datetime
-from ..models import Event, EventsAndPersonality
-from ..dependencies import (
+from app.handler.helper.responses import success_response
+from app.models import Event, EventsAndPersonality
+from app.dependencies import (
     create_usecase,
     set_personality_usecase,
     get_event_by_id_usecase,
     get_all_events_usecase,
     delete_event_by_id_usecase,
+    update_event_usecase,
 )
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
-from .helper.responses import failure_response, success_response
-from .helper.handle_failure_result import handle_failure_result
-from ..dto.usecase_result import UsecaseResult, UsecaseStatus
+import datetime
 
 
 event_router = APIRouter()
@@ -21,16 +19,9 @@ event_router = APIRouter()
     "/event", response_description="Create new event", response_model=Event
 )
 async def create_event(event: Event):
-    event = await add_creation_time(event)
-    result = await create_usecase.execute(event)
-    if result.status != UsecaseStatus.SUCCESS:
-        return handle_failure_result(result)
-    return success_response("Event successfully created")
-
-
-async def add_creation_time(event):
     event.create_dt = datetime.datetime.now()
-    return event
+    await create_usecase.execute(event)
+    return success_response("Event successfully created")
 
 
 @event_router.post(
@@ -39,34 +30,34 @@ async def add_creation_time(event):
     response_model=EventsAndPersonality,
 )
 async def set_personality_by_event(events_and_personality: EventsAndPersonality):
-    result = await set_personality_usecase.execute(events_and_personality)
-    if result.status != UsecaseStatus.SUCCESS:
-        return handle_failure_result(result)
+    await set_personality_usecase.execute(events_and_personality)
     return success_response("Personality set successfully")
 
 
-@event_router.get("/event/{event_id}/", response_description="Get event by id")
+@event_router.get("/event/{event_id}", response_description="Get event by id")
 async def get_event_by_id(event_id: str):
-    result = await get_event_by_id_usecase.execute(event_id)
-    if result.status != UsecaseStatus.SUCCESS:
-        return handle_failure_result(result)
-    return success_response(result.data)
+    event = await get_event_by_id_usecase.execute(event_id)
+    return success_response(event.to_json())
 
 
 @event_router.get("/event", response_description="Get all events")
-async def get_all_events(
-    offset: int,
-    limit: int,
-):
-    result = await get_all_events_usecase.execute(offset, limit)
-    if result.status != UsecaseStatus.SUCCESS:
-        return handle_failure_result(result)
-    return success_response(result.data)
+async def get_all_events(offset: int, limit: int):
+    event_dicts = []
+    event_models = await get_all_events_usecase.execute(offset, limit)
+    for event in event_models:
+        event_dicts.append(event.to_json())
+    return success_response(event_dicts)
 
 
 @event_router.delete("/event/{event_id}", response_description="Delete event by id")
 async def delete_event_by_id(event_id: str):
-    result = await delete_event_by_id_usecase.execute(event_id)
-    if result.status != UsecaseStatus.SUCCESS:
-        return handle_failure_result(result)
-    return success_response(result.data)
+    await delete_event_by_id_usecase.execute(event_id)
+    return success_response("Event successfully deleted")
+
+
+@event_router.put(
+    "/event/{event_id}", response_description="Update event", response_model=Event
+)
+async def update_event(event_id: str, event: Event):
+    await update_event_usecase.execute(event_id, event)
+    return success_response("Event successfully updated")
