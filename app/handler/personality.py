@@ -1,4 +1,4 @@
-from app.models import Personality, Career, EventsAndPersonality
+from app.models import Personality, Career, EventsAndPersonality, Filters
 from app.handler.helper.responses import success_response
 from app.dependencies import (
     create_personalit_usecase,
@@ -13,6 +13,7 @@ from app.dependencies import (
     update_career_usecase,
 )
 from fastapi import APIRouter
+from fastapi import Depends
 import datetime
 
 
@@ -59,9 +60,9 @@ async def get_personality_by_id(personality_id: str):
 
 
 @personality_router.get("/personality", response_description="Get all personalities")
-async def get_all_personalities(offset: int, limit: int):
+async def get_all_personalities(filter: Filters = Depends()):
     personality_dicts = []
-    personalities_model = await get_all_personalities_usecase.execute(offset, limit)
+    personalities_model = await get_all_personalities_usecase.execute(filter)
     for personality in personalities_model:
         personality_dicts.append(personality.to_json())
     return success_response(personality_dicts)

@@ -1,4 +1,4 @@
-from app.models import Personality, Career, EventsAndPersonality
+from app.models import Personality, Career, EventsAndPersonality, Filters
 
 
 class PersonalityRepository:
@@ -65,11 +65,22 @@ class PersonalityRepository:
             events_and_personality.to_json()
         )
 
-    async def get_all_personalities(self, offset, limit):
+    async def get_all_personalities(self, filters: Filters):
         personalities_lst = []
-        cursor = self.collection_personality.find().skip(offset).limit(limit)
+        query = {
+            "born": {
+                "$gte": str(filters.start_date),
+                "$lte": str(filters.end_date),
+            }
+        }
+        cursor = (
+            self.collection_personality.find(query)
+            .sort(filters.sort_by, filters.direction)
+            .skip(filters.offset)
+            .limit(filters.limit)
+        )
 
-        for personality_dict in await cursor.to_list(length=limit):
+        for personality_dict in await cursor.to_list(length=filters.limit):
             personality = Personality(
                 d=personality_dict["_id"],
                 name=personality_dict["name"],

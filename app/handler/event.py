@@ -1,5 +1,5 @@
 from app.handler.helper.responses import success_response
-from app.models import Event, EventsAndPersonality
+from app.models import Event, EventsAndPersonality, Filters
 from app.dependencies import (
     create_usecase,
     set_personality_usecase,
@@ -9,6 +9,7 @@ from app.dependencies import (
     update_event_usecase,
 )
 from fastapi import APIRouter
+from fastapi import Depends
 import datetime
 
 
@@ -40,10 +41,13 @@ async def get_event_by_id(event_id: str):
     return success_response(event.to_json())
 
 
-@event_router.get("/event", response_description="Get all events")
-async def get_all_events(offset: int, limit: int):
+@event_router.get(
+    "/event",
+    response_description="Get all events",
+)
+async def get_all_events(filter: Filters = Depends()):
     event_dicts = []
-    event_models = await get_all_events_usecase.execute(offset, limit)
+    event_models = await get_all_events_usecase.execute(filter)
     for event in event_models:
         event_dicts.append(event.to_json())
     return success_response(event_dicts)

@@ -1,4 +1,4 @@
-from app.models import Event, EventsAndPersonality
+from app.models import Event, EventsAndPersonality, Filters
 import motor.motor_asyncio
 from typing import List
 
@@ -49,10 +49,23 @@ class EventRepository:
             events_and_personality.to_json()
         )
 
-    async def get_all_events(self, offset: int, limit: int) -> List[Event]:
+    async def get_all_events(self, filters: Filters) -> List[Event]:
         events_lst = []
-        cursor = self.collection_events.find().skip(offset).limit(limit)
-        for event_dict in await cursor.to_list(length=limit):
+
+        query = {
+            "start_date": {
+                "$gte": str(filters.start_date),
+                "$lte": str(filters.end_date),
+            }
+        }
+        cursor = (
+            self.collection_events.find(query)
+            .sort(filters.sort_by, filters.direction)
+            .skip(filters.offset)
+            .limit(filters.limit)
+        )
+
+        for event_dict in await cursor.to_list(length=filters.limit):
             event = Event(
                 id=event_dict["_id"],
                 name=event_dict["name"],
@@ -71,7 +84,3 @@ class EventRepository:
 
     async def update_event(self, event: Event) -> None:
         await self.collection_events.replace_one({"_id": event.id}, event.to_json())
-
-
-# count the number of documents
-# number_of_events = await self.collection_events.count_documents({})

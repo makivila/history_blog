@@ -4,11 +4,11 @@ from typing import Any
 import json
 
 
-def success_response(message: Any = None) -> JSONResponse:
-    if message:
+def success_response(data: Any = None) -> JSONResponse:
+    if data:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=f"status: success, message: {message}",
+            content={"status": "success", "data": data},
         )
     else:
         return JSONResponse(status_code=status.HTTP_200_OK, content="status : success")

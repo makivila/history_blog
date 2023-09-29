@@ -117,3 +117,12 @@ class Career(BaseModel):
 
     def to_json(self):
         return {"_id": str(self.id), "name": self.name}
+
+
+class Filters(BaseModel):
+    start_date: date | None = Field(default="0000-01-01")
+    end_date: date | None = Field(default="9999-12-31")
+    offset: int | None = Field(default=None)
+    limit: int | None = Field(default=None)
+    direction: int | None = Field(default=1)
+    sort_by: str | None = Field(default="create_dt")
