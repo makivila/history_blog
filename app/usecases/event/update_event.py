@@ -8,8 +8,5 @@ class UpdateEventUsecase:
         self.repository = repository
 
     async def execute(self, id: str, event: Event) -> None:
-        existing_event = await self.repository.get_event_by_id(id)
-        if not existing_event:
-            raise NotFoundException("This event not found")
         event.id = id
         await self.repository.update_event(event)

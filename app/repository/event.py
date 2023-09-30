@@ -1,4 +1,5 @@
 from app.models import Event, EventsAndPersonality, Filters
+from app.handler.helper.exceptions import NotFoundException
 import motor.motor_asyncio
 from typing import List
 
@@ -19,7 +20,7 @@ class EventRepository:
     async def get_event_by_id(self, id):
         event_dict = await self.collection_events.find_one({"_id": id})
         if not event_dict:
-            return None
+            raise NotFoundException("This event not found")
         event = Event(
             id=event_dict["_id"],
             name=event_dict["name"],
@@ -40,7 +41,11 @@ class EventRepository:
         result = await self.collection_event_and_personality_ids.find_one(
             {"event_id": event_id}
         )
-        return result
+        events_and_personality = EventsAndPersonality(
+            personality_id=result.personality_id,
+            event_id=result.personality_id,
+        )
+        return events_and_personality
 
     async def set_personality_by_event(
         self, events_and_personality: EventsAndPersonality
@@ -80,7 +85,13 @@ class EventRepository:
         return events_lst
 
     async def delete_event_by_id(self, id) -> None:
-        await self.collection_events.delete_one({"_id": id})
+        result = await self.collection_events.delete_one({"_id": id})
+        if result.deleted_count == 0:
+            raise NotFoundException("This event not found")
 
     async def update_event(self, event: Event) -> None:
-        await self.collection_events.replace_one({"_id": event.id}, event.to_json())
+        result = await self.collection_events.replace_one(
+            {"_id": event.id}, event.to_json()
+        )
+        if result.modified_count == 0:
+            raise NotFoundException

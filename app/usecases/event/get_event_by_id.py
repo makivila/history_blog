@@ -9,6 +9,4 @@ class GetEventByIdUsecase:
 
     async def execute(self, id: str) -> Event:
         event = await self.repository.get_event_by_id(id)
-        if not event:
-            raise NotFoundException("This event not found")
         return event

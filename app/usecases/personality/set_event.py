@@ -11,7 +11,7 @@ class SetEventUsecase:
         event = await self.repository.get_event_by_personality_id(
             events_and_personality.personality_id
         )
-        if event["event_id"] == events_and_personality.event_id:
+        if event.event_id == events_and_personality.event_id:
             raise BadRequestException(
                 "This person is already associated with this event"
             )

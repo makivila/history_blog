@@ -8,7 +8,4 @@ class DeleteEventByIdUsecase:
         self.repository = repository
 
     async def execute(self, id: str) -> None:
-        event = await self.repository.get_event_by_id(id)
-        if not event:
-            raise NotFoundException("This event not found")
         await self.repository.delete_event_by_id(id)

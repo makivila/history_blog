@@ -1,4 +1,5 @@
 from app.models import Personality, Career, EventsAndPersonality, Filters
+from app.handler.helper.exceptions import NotFoundException, BadRequestException
 
 
 class PersonalityRepository:
@@ -20,7 +21,7 @@ class PersonalityRepository:
     async def get_personality_by_id(self, id: str):
         personality_dict = await self.collection_personality.find_one({"_id": id})
         if not personality_dict:
-            return None
+            raise NotFoundException
         personality = Personality(
             id=personality_dict["_id"],
             name=personality_dict["name"],
@@ -44,7 +45,7 @@ class PersonalityRepository:
     async def get_career_by_id(self, id: str):
         career_dict = await self.collection_career.find_one({"_id": id})
         if not career_dict:
-            return None
+            raise NotFoundException
         career = Career(name=career_dict["name"])
         return career
 
@@ -56,7 +57,11 @@ class PersonalityRepository:
         result = await self.collection_event_and_personality_ids.find_one(
             {"personality_id": personality_id}
         )
-        return result
+        events_and_personality = EventsAndPersonality(
+            personality_id=result.personality_id,
+            event_id=result.personality_id,
+        )
+        return events_and_personality
 
     async def set_event_by_personality(
         self, events_and_personality: EventsAndPersonality
@@ -104,15 +109,25 @@ class PersonalityRepository:
         return careers_lst
 
     async def delete_personality_by_id(self, id) -> None:
-        await self.collection_personality.delete_one({"_id": id})
+        result = await self.collection_personality.delete_one({"_id": id})
+        if result.deleted_count == 0:
+            raise NotFoundException("This personality not found")
 
     async def delete_career_by_id(self, id) -> None:
-        await self.collection_career.delete_one({"_id": id})
+        result = await self.collection_career.delete_one({"_id": id})
+        if result.deleted_count == 0:
+            raise NotFoundException("This career not found")
 
     async def update_personality(self, personality: Personality) -> None:
-        await self.collection_personality.replace_one(
+        result = await self.collection_personality.replace_one(
             {"_id": personality.id}, personality.to_json()
         )
+        if result.modified_count == 0:
+            raise NotFoundException("This personality not found")
 
     async def update_career(self, career: Career) -> None:
-        await self.collection_career.replace_one({"_id": career.id}, career.to_json())
+        result = await self.collection_career.replace_one(
+            {"_id": career.id}, career.to_json()
+        )
+        if result.modified_count == 0:
+            raise NotFoundException("This career not found")
