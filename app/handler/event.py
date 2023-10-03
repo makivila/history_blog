@@ -46,7 +46,6 @@ async def get_event_by_id(event_id: str):
     response_description="Get all events",
 )
 async def get_all_events(filter: Filters = Depends()):
-    print("Ну то есть я даже пайдентик не могу пройти")
     event_dicts = []
     event_models = await get_all_events_usecase.execute(filter)
     for event in event_models:
@@ -56,7 +55,6 @@ async def get_all_events(filter: Filters = Depends()):
 
 @event_router.delete("/event/{event_id}", response_description="Delete event by id")
 async def delete_event_by_id(event_id: str):
-    print("в хендлере получаю вот такой ивент", event_id)
     await delete_event_by_id_usecase.execute(event_id)
     return success_response("Event successfully deleted")
 

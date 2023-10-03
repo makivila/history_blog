@@ -5,29 +5,7 @@ from bson import ObjectId
 import uuid
 
 
-# class PyObjectId(ObjectId):
-#     @classmethod
-#     def __get_validators__(cls):
-#         print("я здесь")
-#         yield cls.validate
-#         print("куку")
-
-#     @classmethod
-#     def validate(cls, v):
-#         print("входящеее значение", v)
-#         if not ObjectId.is_valid(v):
-#             raise ValueError("Invalid objectid")
-#         return ObjectId(v)
-
-#     @classmethod
-#     def __get_pydantic_json_schema__(cls, field_schema):
-#         print("не, я здесь")
-
-#         field_schema.update(type="string")
-
-
 class Personality(BaseModel):
-    # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     id: str = Field(default=str(uuid.uuid4()))
     name: str
     career_id: str
@@ -65,7 +43,6 @@ class Personality(BaseModel):
 
 
 class Event(BaseModel):
-    # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     id: str = Field(default=str(uuid.uuid4()))
     name: str
     start_date: date
@@ -77,7 +54,6 @@ class Event(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        # json_encoders = {ObjectId: str}
         json_schema_extra = {
             "example": {
                 "name": "Вторая мировая война",
@@ -111,7 +87,6 @@ class EventsAndPersonality(BaseModel):
 
 
 class Career(BaseModel):
-    # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     id: str | None
     name: str
 
