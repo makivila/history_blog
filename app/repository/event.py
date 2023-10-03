@@ -1,5 +1,5 @@
 from app.models import Event, EventsAndPersonality, Filters
-from app.handler.helper.exceptions import NotFoundException
+from app.handler.helper.exceptions import NotFoundException, AlreadyExistsException
 import motor.motor_asyncio
 from typing import List
 
@@ -14,11 +14,16 @@ class EventRepository:
         ]
 
     async def create_event(self, event: Event):
+        if await self.is_exists("name", event.name):
+            raise AlreadyExistsException("This event already exists")
         new_event = await self.collection_events.insert_one(event.to_json())
         return new_event
 
     async def get_event_by_id(self, id):
+        print("в репозиории получила вот такой ивент айди", id)
         event_dict = await self.collection_events.find_one({"_id": id})
+        print("что вовращает иветн", event_dict)
+        print(str(event_dict["_id"]))
         if not event_dict:
             raise NotFoundException("This event not found")
         event = Event(
@@ -31,11 +36,15 @@ class EventRepository:
             victim_numbers=event_dict["victim_numbers"],
             interesting_facts=event_dict["interesting_facts"],
         )
+        print("вот такой ивент по айди получаю", event.__dict__)
         return event
 
-    async def get_event_by_name(self, name):
-        result = await self.collection_events.find_one({"name": name})
-        return result
+    async def is_exists(self, field, value):
+        result = await self.collection_events.find_one({field: value})
+        if result:
+            return True
+        else:
+            return False
 
     async def get_personality_by_event_id(self, event_id):
         result = await self.collection_event_and_personality_ids.find_one(
@@ -63,6 +72,8 @@ class EventRepository:
                 "$lte": str(filters.end_date),
             }
         }
+        if filters.search_by_name:
+            query["name"] = {"$regex": filters.search_by_name}
         cursor = (
             self.collection_events.find(query)
             .sort(filters.sort_by, filters.direction)
@@ -80,6 +91,9 @@ class EventRepository:
                 description=event_dict["description"],
                 victim_numbers=event_dict["victim_numbers"],
                 interesting_facts=event_dict["interesting_facts"],
+            )
+            print(
+                "вот получаю все ивенты и вот какие данные в них лежат", event.__dict__
             )
             events_lst.append(event)
         return events_lst

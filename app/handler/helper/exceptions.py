@@ -5,6 +5,7 @@ class StatusType(Enum):
     INTERNAL_ERROR = 1
     NOT_FOUND = 2
     BAD_REQUEST = 3
+    ALREADY_EXISTS = 4
 
 
 class ApplicationException(Exception):
@@ -24,5 +25,12 @@ class NotFoundException(ApplicationException):
 class BadRequestException(ApplicationException):
     def __init__(
         self, message="Bad request", status_type=StatusType.BAD_REQUEST
+    ) -> None:
+        super().__init__(message, status_type)
+
+
+class AlreadyExistsException(ApplicationException):
+    def __init__(
+        self, message="Bad request", status_type=StatusType.ALREADY_EXISTS
     ) -> None:
         super().__init__(message, status_type)

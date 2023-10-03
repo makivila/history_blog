@@ -5,10 +5,12 @@ import json
 
 
 def success_response(data: Any = None) -> JSONResponse:
-    if data:
+    if data is not None:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"status": "success", "data": data},
         )
     else:
-        return JSONResponse(status_code=status.HTTP_200_OK, content="status : success")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK, content={"status : success"}
+        )

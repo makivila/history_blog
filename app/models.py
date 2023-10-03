@@ -1,27 +1,34 @@
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional, List, Union
 from pydantic import BaseModel, Field
 from bson import ObjectId
+import uuid
 
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+# class PyObjectId(ObjectId):
+#     @classmethod
+#     def __get_validators__(cls):
+#         print("я здесь")
+#         yield cls.validate
+#         print("куку")
 
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
+#     @classmethod
+#     def validate(cls, v):
+#         print("входящеее значение", v)
+#         if not ObjectId.is_valid(v):
+#             raise ValueError("Invalid objectid")
+#         return ObjectId(v)
 
-    @classmethod
-    def __get_pydantic_json_schema__(cls, field_schema):
-        field_schema.update(type="string")
+#     @classmethod
+#     def __get_pydantic_json_schema__(cls, field_schema):
+#         print("не, я здесь")
+
+#         field_schema.update(type="string")
 
 
 class Personality(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: str = Field(default=str(uuid.uuid4()))
     name: str
     career_id: str
     description: str
@@ -58,7 +65,8 @@ class Personality(BaseModel):
 
 
 class Event(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: str = Field(default=str(uuid.uuid4()))
     name: str
     start_date: date
     end_date: date
@@ -69,7 +77,7 @@ class Event(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+        # json_encoders = {ObjectId: str}
         json_schema_extra = {
             "example": {
                 "name": "Вторая мировая война",
@@ -103,7 +111,8 @@ class EventsAndPersonality(BaseModel):
 
 
 class Career(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: str | None
     name: str
 
     class Config:
@@ -120,9 +129,10 @@ class Career(BaseModel):
 
 
 class Filters(BaseModel):
-    start_date: date | None = Field(default="0000-01-01")
+    start_date: date | None = Field(default="0001-01-01")
     end_date: date | None = Field(default="9999-12-31")
-    offset: int | None = Field(default=None)
-    limit: int | None = Field(default=None)
+    offset: int | None = Field(default=0)
+    limit: int | None = Field(default=10)
     direction: int | None = Field(default=1)
     sort_by: str | None = Field(default="create_dt")
+    search_by_name: str | None = Field(default=None)
