@@ -8,5 +8,7 @@ class UpdateEventUsecase:
         self.repository = repository
 
     async def execute(self, id: str, event: Event) -> None:
+        old_event = await self.repository.get_event_by_id(id)
         event.id = id
+        event.create_dt = old_event.create_dt
         await self.repository.update_event(event)

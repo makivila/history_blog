@@ -1,5 +1,5 @@
-from app.models import Personality, Filters
 from app.repository.event import EventRepository
+from app.models import Personality, Filters
 from typing import List
 
 
@@ -8,5 +8,4 @@ class GetAllPersonalitiesUsecase:
         self.repository = repository
 
     async def execute(self, filters: Filters) -> List[Personality]:
-        personalities = await self.repository.get_all_personalities(filters)
-        return personalities
+        return await self.repository.get_all_personalities(filters)

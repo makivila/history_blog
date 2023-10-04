@@ -8,5 +8,4 @@ class GetAllEventsUsecase:
         self.repository = repository
 
     async def execute(self, filters: Filters) -> List[Event]:
-        events = await self.repository.get_all_events(filters)
-        return events
+        return await self.repository.get_all_events(filters)

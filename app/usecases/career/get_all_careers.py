@@ -8,5 +8,4 @@ class GetAllCareersUsecase:
         self.repository = repository
 
     async def execute(self, offset, limit) -> List[Career]:
-        careers = await self.repository.get_all_careers(offset, limit)
-        return careers
+        return await self.repository.get_all_careers(offset, limit)

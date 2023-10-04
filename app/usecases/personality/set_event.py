@@ -8,11 +8,4 @@ class SetEventUsecase:
         self.repository = repository
 
     async def execute(self, events_and_personality: EventsAndPersonality) -> None:
-        event = await self.repository.get_event_by_personality_id(
-            events_and_personality.personality_id
-        )
-        if event.event_id == events_and_personality.event_id:
-            raise BadRequestException(
-                "This person is already associated with this event"
-            )
         await self.repository.set_event_by_personality(events_and_personality)

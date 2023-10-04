@@ -1,5 +1,5 @@
-from app.models import Personality, Career, EventsAndPersonality, Filters
-from app.handler.helper.exceptions import NotFoundException, BadRequestException
+from app.handler.helper.exceptions import NotFoundException, AlreadyExistsException
+from app.models import Personality, EventsAndPersonality, Filters
 
 
 class PersonalityRepository:
@@ -7,16 +7,26 @@ class PersonalityRepository:
         self.db_client = db_client
         self.database = self.db_client.history_blog
         self.collection_personality = self.database["personality"]
-        self.collection_career = self.database["career"]
         self.collection_event_and_personality_ids = self.database[
             "event_and_personality_ids"
         ]
 
     async def create_personality(self, personality: Personality):
-        new_personality = await self.collection_personality.insert_one(
-            personality.to_json()
-        )
-        return new_personality
+        if await self.is_exists("name", personality.name):
+            raise AlreadyExistsException("This personality already exsist")
+        await self.collection_personality.insert_one(personality.to_json())
+
+    async def is_exists(self, field, value):
+        result = await self.collection_events.find_one({field: value})
+        if result:
+            return True
+        else:
+            return False
+
+    async def delete_personality_by_id(self, id) -> None:
+        result = await self.collection_personality.delete_one({"_id": id})
+        if result.deleted_count == 0:
+            raise NotFoundException("This personality not found")
 
     async def get_personality_by_id(self, id: str):
         personality_dict = await self.collection_personality.find_one({"_id": id})
@@ -33,42 +43,6 @@ class PersonalityRepository:
             create_dt=personality_dict["create_dt"],
         )
         return personality
-
-    async def get_personality_by_name(self, name: str):
-        result = await self.collection_personality.find_one({"name": name})
-        return result
-
-    async def create_career(self, career: Career):
-        new_career = await self.collection_career.insert_one(career.to_json())
-        return new_career
-
-    async def get_career_by_id(self, id: str):
-        career_dict = await self.collection_career.find_one({"_id": id})
-        if not career_dict:
-            raise NotFoundException
-        career = Career(name=career_dict["name"])
-        return career
-
-    async def get_career_by_name(self, name: str):
-        result = await self.collection_career.find_one({"name": name})
-        return result
-
-    async def get_event_by_personality_id(self, personality_id):
-        result = await self.collection_event_and_personality_ids.find_one(
-            {"personality_id": personality_id}
-        )
-        events_and_personality = EventsAndPersonality(
-            personality_id=result.personality_id,
-            event_id=result.personality_id,
-        )
-        return events_and_personality
-
-    async def set_event_by_personality(
-        self, events_and_personality: EventsAndPersonality
-    ):
-        await self.collection_event_and_personality_ids.insert_one(
-            events_and_personality.to_json()
-        )
 
     async def get_all_personalities(self, filters: Filters):
         personalities_lst = []
@@ -99,25 +73,6 @@ class PersonalityRepository:
             personalities_lst.append(personality)
         return personalities_lst
 
-    async def get_all_careers(self, offset, limit):
-        careers_lst = []
-        cursor = self.collection_career.find().skip(offset).limit(limit)
-
-        for career_dict in await cursor.to_list(length=limit):
-            career = Career(id=career_dict["_id"], name=career_dict["name"])
-            careers_lst.append(career)
-        return careers_lst
-
-    async def delete_personality_by_id(self, id) -> None:
-        result = await self.collection_personality.delete_one({"_id": id})
-        if result.deleted_count == 0:
-            raise NotFoundException("This personality not found")
-
-    async def delete_career_by_id(self, id) -> None:
-        result = await self.collection_career.delete_one({"_id": id})
-        if result.deleted_count == 0:
-            raise NotFoundException("This career not found")
-
     async def update_personality(self, personality: Personality) -> None:
         result = await self.collection_personality.replace_one(
             {"_id": personality.id}, personality.to_json()
@@ -125,9 +80,25 @@ class PersonalityRepository:
         if result.modified_count == 0:
             raise NotFoundException("This personality not found")
 
-    async def update_career(self, career: Career) -> None:
-        result = await self.collection_career.replace_one(
-            {"_id": career.id}, career.to_json()
+    async def set_event_by_personality(
+        self, events_and_personality: EventsAndPersonality
+    ):
+        if await self.is_exists_event_by_personality(
+            events_and_personality.personality_id
+        ):
+            raise AlreadyExistsException(
+                "This person is already associated with this event"
+            )
+        await self.collection_event_and_personality_ids.insert_one(
+            events_and_personality.to_json()
         )
-        if result.modified_count == 0:
-            raise NotFoundException("This career not found")
+
+    async def is_exists_event_by_personality(self, events_and_personality):
+        result = await self.collection_event_and_personality_ids.find_one(
+            {"personality_id": events_and_personality.personality_id}
+        )
+
+        if result["event_id"] == events_and_personality.event_id:
+            return True
+        else:
+            return False

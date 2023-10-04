@@ -7,5 +7,4 @@ class GetPersonalityByIdUsecase:
         self.repository = repository
 
     async def execute(self, id: str) -> Personality:
-        personality = await self.repository.get_personality_by_id(id)
-        return personality
+        return await self.repository.get_personality_by_id(id)

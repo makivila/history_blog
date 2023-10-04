@@ -8,5 +8,4 @@ class GetEventByIdUsecase:
         self.repository = repository
 
     async def execute(self, id: str) -> Event:
-        event = await self.repository.get_event_by_id(id)
-        return event
+        return await self.repository.get_event_by_id(id)
