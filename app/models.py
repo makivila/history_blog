@@ -87,12 +87,11 @@ class EventsAndPersonality(BaseModel):
 
 
 class Career(BaseModel):
-    id: str | None
+    id: str = Field(default=str(uuid.uuid4()))
     name: str
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
         json_schema_extra = {
             "json_schema_extra": {
                 "name": "Императрица",

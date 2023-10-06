@@ -81,7 +81,7 @@ class EventRepository:
     async def set_personality_by_event(
         self, events_and_personality: EventsAndPersonality
     ) -> None:
-        if await self.is_exists_personality_by_event(events_and_personality.event_id):
+        if await self.is_exists_personality_by_event(events_and_personality):
             raise AlreadyExistsException(
                 "This event is already associated with this personality"
             )
@@ -93,10 +93,12 @@ class EventRepository:
         result = await self.collection_event_and_personality_ids.find_one(
             {"event_id": events_and_personality.event_id}
         )
-        if result["personality_id"] == events_and_personality.personality_id:
-            return True
-        else:
-            return False
+        if result:
+            if result["personality_id"] == events_and_personality.personality_id:
+                return True
+            else:
+                return False
+        return False
 
     async def update_event(self, event: Event) -> None:
         result = await self.collection_events.update_one(

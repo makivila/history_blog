@@ -17,7 +17,7 @@ class PersonalityRepository:
         await self.collection_personality.insert_one(personality.to_json())
 
     async def is_exists(self, field, value):
-        result = await self.collection_events.find_one({field: value})
+        result = await self.collection_personality.find_one({field: value})
         if result:
             return True
         else:
@@ -83,9 +83,7 @@ class PersonalityRepository:
     async def set_event_by_personality(
         self, events_and_personality: EventsAndPersonality
     ):
-        if await self.is_exists_event_by_personality(
-            events_and_personality.personality_id
-        ):
+        if await self.is_exists_event_by_personality(events_and_personality):
             raise AlreadyExistsException(
                 "This person is already associated with this event"
             )
@@ -93,12 +91,15 @@ class PersonalityRepository:
             events_and_personality.to_json()
         )
 
-    async def is_exists_event_by_personality(self, events_and_personality):
+    async def is_exists_event_by_personality(
+        self, events_and_personality: EventsAndPersonality
+    ):
         result = await self.collection_event_and_personality_ids.find_one(
             {"personality_id": events_and_personality.personality_id}
         )
-
-        if result["event_id"] == events_and_personality.event_id:
-            return True
-        else:
-            return False
+        if result:
+            if result["event_id"] == events_and_personality.event_id:
+                return True
+            else:
+                return False
+        return False

@@ -24,8 +24,11 @@ async def create_career(career: Career):
 
 @career_router.get("/career", response_description="Get all careers")
 async def get_all_careers(offset: int, limit: int):
-    result = await get_all_careers_usecase.execute(offset, limit)
-    return success_response(result.data)
+    career_model = await get_all_careers_usecase.execute(offset, limit)
+    career_dicts = []
+    for career in career_model:
+        career_dicts.append(career.to_json())
+    return success_response(career_dicts)
 
 
 @career_router.delete("/career/{career_id}", response_description="Delete career by id")

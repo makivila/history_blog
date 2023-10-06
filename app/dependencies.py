@@ -48,7 +48,7 @@ get_all_personalities_usecase = GetAllPersonalitiesUsecase(personality_repositor
 delete_personality_by_id_usecase = DeletePersonalityByIdUsecase(personality_repository)
 update_personalityt_usecase = UpdatePersonalitytUsecase(personality_repository)
 
-update_career_usecase = UpdateCareerUsecase(personality_repository)
-delete_career_by_id_usecase = DeleteCareerByIdUsecase(personality_repository)
-create_career_usecase = CreateCareerUsecase(personality_repository)
-get_all_careers_usecase = GetAllCareersUsecase(personality_repository)
+update_career_usecase = UpdateCareerUsecase(career_repository)
+delete_career_by_id_usecase = DeleteCareerByIdUsecase(career_repository)
+create_career_usecase = CreateCareerUsecase(career_repository)
+get_all_careers_usecase = GetAllCareersUsecase(career_repository)

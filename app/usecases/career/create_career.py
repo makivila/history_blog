@@ -1,10 +1,10 @@
-from ...repository.personality import PersonalityRepository
-from app.handler.helper.exceptions import BadRequestException
+from app.repository.career import CareerRepository
+
 from app.models import Career
 
 
 class CreateCareerUsecase:
-    def __init__(self, repository: PersonalityRepository) -> None:
+    def __init__(self, repository: CareerRepository) -> None:
         self.repository = repository
 
     async def execute(self, career: Career) -> None:

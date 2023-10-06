@@ -9,12 +9,12 @@ class CareerRepository:
         self.collection_career = self.database["career"]
 
     async def create_career(self, career: Career):
-        if self.is_exists("name", career.name):
+        if await self.is_exists("name", career.name):
             raise AlreadyExistsException("This career already exsist")
         await self.collection_career.insert_one(career.to_json())
 
     async def is_exists(self, field, value):
-        result = await self.collection_events.find_one({field: value})
+        result = await self.collection_career.find_one({field: value})
         if result:
             return True
         else:
@@ -35,6 +35,8 @@ class CareerRepository:
         return careers_lst
 
     async def update_career(self, career: Career) -> None:
+        if await self.is_exists("name", career.name):
+            raise AlreadyExistsException("Career with this name already exists")
         result = await self.collection_career.replace_one(
             {"_id": career.id}, career.to_json()
         )

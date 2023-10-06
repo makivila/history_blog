@@ -1,4 +1,3 @@
-from app.handler.helper.exceptions import BadRequestException
 from app.repository.personality import PersonalityRepository
 from app.models import EventsAndPersonality
 

@@ -1,8 +1,8 @@
-from app.repository.personality import PersonalityRepository
+from app.repository.career import CareerRepository
 
 
 class DeleteCareerByIdUsecase:
-    def __init__(self, repository: PersonalityRepository) -> None:
+    def __init__(self, repository: CareerRepository) -> None:
         self.repository = repository
 
     async def execute(self, id: str) -> None:
