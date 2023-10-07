@@ -1,7 +1,6 @@
-from datetime import datetime, date
-from typing import Optional, List, Union
 from pydantic import BaseModel, Field
-from bson import ObjectId
+from datetime import datetime, date
+from typing import Optional
 import uuid
 
 
@@ -17,7 +16,6 @@ class Personality(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
         json_schema_extra = {
             "example": {
                 "name": "Екатерина Великая",

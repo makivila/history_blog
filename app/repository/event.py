@@ -1,5 +1,5 @@
-from app.models import Event, EventsAndPersonality, Filters
 from app.handler.helper.exceptions import NotFoundException, AlreadyExistsException
+from app.models import Event, EventsAndPersonality, Filters
 import motor.motor_asyncio
 from typing import List
 
@@ -27,6 +27,7 @@ class EventRepository:
 
     async def delete_event_by_id(self, id) -> None:
         result = await self.collection_events.delete_one({"_id": id})
+        await self.collection_event_and_personality_ids.delete_many({"event_id": id})
         if result.deleted_count == 0:
             raise NotFoundException("This event not found")
 
@@ -101,6 +102,8 @@ class EventRepository:
         return False
 
     async def update_event(self, event: Event) -> None:
+        if await self.is_exists("name", event.name):
+            raise AlreadyExistsException("Event with this name already exists")
         result = await self.collection_events.update_one(
             {"_id": event.id}, event.to_json()
         )

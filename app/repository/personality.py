@@ -25,6 +25,9 @@ class PersonalityRepository:
 
     async def delete_personality_by_id(self, id) -> None:
         result = await self.collection_personality.delete_one({"_id": id})
+        await self.collection_event_and_personality_ids.delete_many(
+            {"personality_id": id}
+        )
         if result.deleted_count == 0:
             raise NotFoundException("This personality not found")
 
@@ -74,6 +77,8 @@ class PersonalityRepository:
         return personalities_lst
 
     async def update_personality(self, personality: Personality) -> None:
+        if await self.is_exists("name", personality.name):
+            raise AlreadyExistsException("Personality with this name already exists")
         result = await self.collection_personality.replace_one(
             {"_id": personality.id}, personality.to_json()
         )
