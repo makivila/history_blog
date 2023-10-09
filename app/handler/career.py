@@ -13,7 +13,7 @@ career_router = APIRouter()
 
 
 @career_router.post(
-    "/career",
+    "/",
     response_description="Create new career",
     response_model=Career,
 )
@@ -22,7 +22,7 @@ async def create_career(career: Career):
     return success_response("Career successfully created")
 
 
-@career_router.get("/career", response_description="Get all careers")
+@career_router.get("/", response_description="Get all careers")
 async def get_all_careers(offset: int, limit: int):
     career_model = await get_all_careers_usecase.execute(offset, limit)
     career_dicts = []
@@ -31,14 +31,14 @@ async def get_all_careers(offset: int, limit: int):
     return success_response(career_dicts)
 
 
-@career_router.delete("/career/{career_id}", response_description="Delete career by id")
+@career_router.delete("/{career_id}", response_description="Delete career by id")
 async def delete_career_by_id(career_id: str):
     await delete_career_by_id_usecase.execute(career_id)
     return success_response("Career successfully deleted")
 
 
 @career_router.put(
-    "/career/{career_id}",
+    "/{career_id}",
     response_description="Update career",
     response_model=Career,
 )

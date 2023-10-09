@@ -1,17 +1,15 @@
 from app.handler.helper.exceptions import NotFoundException, AlreadyExistsException
-from app.models import Event, EventsAndPersonality, Filters
+from app.models import Event, EventPersonality, Filters
 import motor.motor_asyncio
 from typing import List
 
 
 class EventRepository:
     def __init__(self, db_client: motor.motor_asyncio.AsyncIOMotorClient) -> None:
-        self.db_client = db_client
-        self.database = self.db_client.history_blog
-        self.collection_events = self.database["events"]
-        self.collection_event_and_personality_ids = self.database[
-            "event_and_personality_ids"
-        ]
+        self.collection_events = db_client.db_client.history_blog.database["events"]
+        self.collection_event_personality_ids = (
+            db_client.db_client.history_blog.database["event_personality_ids"]
+        )
 
     async def create_event(self, event: Event):
         if await self.is_exists("name", event.name):
@@ -80,22 +78,22 @@ class EventRepository:
         return event
 
     async def set_personality_by_event(
-        self, events_and_personality: EventsAndPersonality
+        self, event_personality: EventPersonality
     ) -> None:
-        if await self.is_exists_personality_by_event(events_and_personality):
+        if await self.is_exists_personality_by_event(event_personality):
             raise AlreadyExistsException(
                 "This event is already associated with this personality"
             )
-        await self.collection_event_and_personality_ids.insert_one(
-            events_and_personality.to_json()
+        await self.collection_event_personality_ids.insert_one(
+            event_personality.to_json()
         )
 
-    async def is_exists_personality_by_event(self, events_and_personality):
-        result = await self.collection_event_and_personality_ids.find_one(
-            {"event_id": events_and_personality.event_id}
+    async def is_exists_personality_by_event(self, event_personality):
+        result = await self.collection_event_personality_ids.find_one(
+            {"event_id": event_personality.event_id}
         )
         if result:
-            if result["personality_id"] == events_and_personality.personality_id:
+            if result["personality_id"] == event_personality.personality_id:
                 return True
             else:
                 return False
@@ -107,5 +105,5 @@ class EventRepository:
         result = await self.collection_events.update_one(
             {"_id": event.id}, event.to_json()
         )
-        if result.modified_count == 0:
+        if result.matched_count == 0:
             raise NotFoundException

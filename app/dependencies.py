@@ -3,14 +3,14 @@ from app.config import Config
 from app.logger import create_logger
 
 from app.usecases.event.create_event import CreateEventUsecase
-from app.usecases.event.set_personality import SetPersonalityUsecase
+from app.usecases.event.add_personality import AddPersonalityUsecase
 from app.usecases.event.get_event_by_id import GetEventByIdUsecase
 from app.usecases.event.get_all_events import GetAllEventsUsecase
 from app.usecases.event.delete_event_by_id import DeleteEventByIdUsecase
 from app.usecases.event.update_event import UpdateEventUsecase
 
 from app.usecases.personality.create_personality import CreatePersonalityUsecase
-from app.usecases.personality.set_event import SetEventUsecase
+from app.usecases.personality.add_event import AddEventUsecase
 from app.usecases.personality.get_personality_by_id import GetPersonalityByIdUsecase
 from app.usecases.personality.get_all_personalities import GetAllPersonalitiesUsecase
 from app.usecases.personality.delete_personality import DeletePersonalityByIdUsecase
@@ -35,14 +35,14 @@ career_repository = CareerRepository(client)
 
 
 create_usecase = CreateEventUsecase(event_repository)
-set_personality_usecase = SetPersonalityUsecase(event_repository)
+add_personality_usecase = AddPersonalityUsecase(event_repository)
 get_event_by_id_usecase = GetEventByIdUsecase(event_repository)
 get_all_events_usecase = GetAllEventsUsecase(event_repository)
 delete_event_by_id_usecase = DeleteEventByIdUsecase(event_repository)
 update_event_usecase = UpdateEventUsecase(event_repository)
 
 create_personalit_usecase = CreatePersonalityUsecase(personality_repository)
-set_event_usecase = SetEventUsecase(personality_repository)
+add_event_usecase = AddEventUsecase(personality_repository)
 get_personality_by_id_usecase = GetPersonalityByIdUsecase(personality_repository)
 get_all_personalities_usecase = GetAllPersonalitiesUsecase(personality_repository)
 delete_personality_by_id_usecase = DeletePersonalityByIdUsecase(personality_repository)

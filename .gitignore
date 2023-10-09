@@ -1,3 +1,6 @@
 venv
 .env
 logs
+.grafana_data
+.vscode
+.mongo_data

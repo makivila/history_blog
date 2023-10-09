@@ -12,9 +12,9 @@ from .handler.helper.exception_handlers import (
 
 
 app = FastAPI()
-app.include_router(event_router)
-app.include_router(personality_router)
-app.include_router(career_router)
+app.include_router(router=event_router, prefix="/events")
+app.include_router(router=personality_router, prefix="/personalities")
+app.include_router(router=career_router, prefix="/careers")
 app.add_exception_handler(ApplicationException, application_exception_handler)
 app.add_exception_handler(Exception, unexpected_exception_handler)
 

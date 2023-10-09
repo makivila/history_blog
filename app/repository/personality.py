@@ -1,15 +1,15 @@
 from app.handler.helper.exceptions import NotFoundException, AlreadyExistsException
-from app.models import Personality, EventsAndPersonality, Filters
+from app.models import Personality, EventPersonality, Filters
 
 
 class PersonalityRepository:
     def __init__(self, db_client) -> None:
-        self.db_client = db_client
-        self.database = self.db_client.history_blog
-        self.collection_personality = self.database["personality"]
-        self.collection_event_and_personality_ids = self.database[
-            "event_and_personality_ids"
+        self.collection_personality = db_client.db_client.history_blog.database[
+            "personality"
         ]
+        self.collection_event_personality_ids = (
+            db_client.db_client.history_blog.database["event_personality_ids"]
+        )
 
     async def create_personality(self, personality: Personality):
         if await self.is_exists("name", personality.name):
@@ -82,28 +82,24 @@ class PersonalityRepository:
         result = await self.collection_personality.replace_one(
             {"_id": personality.id}, personality.to_json()
         )
-        if result.modified_count == 0:
+        if result.matched_count == 0:
             raise NotFoundException("This personality not found")
 
-    async def set_event_by_personality(
-        self, events_and_personality: EventsAndPersonality
-    ):
-        if await self.is_exists_event_by_personality(events_and_personality):
+    async def set_event_by_personality(self, event_personality: EventPersonality):
+        if await self.is_exists_event_by_personality(event_personality):
             raise AlreadyExistsException(
                 "This person is already associated with this event"
             )
-        await self.collection_event_and_personality_ids.insert_one(
-            events_and_personality.to_json()
+        await self.collection_event_personality_ids.insert_one(
+            event_personality.to_json()
         )
 
-    async def is_exists_event_by_personality(
-        self, events_and_personality: EventsAndPersonality
-    ):
-        result = await self.collection_event_and_personality_ids.find_one(
-            {"personality_id": events_and_personality.personality_id}
+    async def is_exists_event_by_personality(self, event_personality: EventPersonality):
+        result = await self.collection_event_personality_ids.find_one(
+            {"personality_id": event_personality.personality_id}
         )
         if result:
-            if result["event_id"] == events_and_personality.event_id:
+            if result["event_id"] == event_personality.event_id:
                 return True
             else:
                 return False

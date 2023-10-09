@@ -76,7 +76,7 @@ class Event(BaseModel):
         }
 
 
-class EventsAndPersonality(BaseModel):
+class EventPersonality(BaseModel):
     personality_id: str
     event_id: str
 

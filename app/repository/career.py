@@ -4,9 +4,7 @@ from app.models import Career
 
 class CareerRepository:
     def __init__(self, db_client) -> None:
-        self.db_client = db_client
-        self.database = self.db_client.history_blog
-        self.collection_career = self.database["career"]
+        self.collection_career = db_client.history_blog.database["career"]
 
     async def create_career(self, career: Career):
         if await self.is_exists("name", career.name):
